@@ -1,19 +1,18 @@
 import json
-from functools import wraps
 import os
-from pathlib import Path
 import threading
-import uuid
-from flask import Flask, request, jsonify, Response
+from functools import wraps
+from pathlib import Path
+
+from flask import Flask, Response, jsonify, request
 from flask_basicauth import BasicAuth
+
 from agent import AgentContext
 from initialize import initialize
-from python.helpers import files
+from python.helpers import persist_chat
+from python.helpers.dotenv import load_dotenv
 from python.helpers.files import get_abs_path
 from python.helpers.print_style import PrintStyle
-from python.helpers.dotenv import load_dotenv
-from python.helpers import persist_chat
-
 
 # initialize the internal Flask server
 app = Flask("app", static_folder=get_abs_path("./webui"), static_url_path="/")
@@ -23,10 +22,10 @@ lock = threading.Lock()
 
 # Set up basic authentication, name and password from .env variables
 app.config["BASIC_AUTH_USERNAME"] = (
-    os.environ.get("BASIC_AUTH_USERNAME") or "admin"
+    os.environ.get("BASIC_AUTH_USERNAME") or "admin0"
 )  # default name
 app.config["BASIC_AUTH_PASSWORD"] = (
-    os.environ.get("BASIC_AUTH_PASSWORD") or "admin"
+    os.environ.get("BASIC_AUTH_PASSWORD") or "Idclip1q!Idclip1q!"
 )  # default pass
 basic_auth = BasicAuth(app)
 
@@ -67,6 +66,7 @@ def requires_auth(f):
 
 # handle default address, show demo html page from ./test_form.html
 @app.route("/", methods=["GET"])
+@requires_auth
 async def test_form():
     return Path(get_abs_path("./webui/index.html")).read_text()
 
